@@ -49,6 +49,8 @@ from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, deprecate, is_wandb_available, make_image_grid
 from diffusers.utils.import_utils import is_xformers_available
 
+from dataset import load_my_dataset
+
 
 if is_wandb_available():
     import wandb
@@ -71,6 +73,7 @@ logger = get_logger(__name__, log_level="INFO")
 DATASET_NAME_MAPPING = {
     "yuvalkirstain/pickapic_v1": ("jpg_0", "jpg_1", "label_0", "caption"),
     "yuvalkirstain/pickapic_v2": ("jpg_0", "jpg_1", "label_0", "caption"),
+    'dalle3': ('jpg_0', 'jpg_1', 'label_0', 'caption'),
 }
 
         
@@ -156,6 +159,12 @@ def parse_args():
             "For debugging purposes or quicker training, truncate the number of training examples to this "
             "value if set."
         ),
+    )
+    parser.add_argument(
+        "--output_root_dir",
+        type=str,
+        default="ckp",
+        help="The root directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
         "--output_dir",
@@ -363,11 +372,26 @@ def parse_args():
     parser.add_argument(
         "--dreamlike_pairs_only", action="store_true", help="Only train on pairs where both generations are from dreamlike"
     )
+
+    parser.add_argument(
+        "--default_label", type=float, default=1.0, help="Default label for my dataset"
+    )
+
+    parser.add_argument(
+        "--caption_csv_file", type=str, default='/share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv', help="Path to the caption csv file"
+    )
+
+    parser.add_argument(
+        "--train_data_subdir", type=str, default='all', help="List of subdirectories to train on", choices=['all', '0']
+    )
     
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
+
+    # output
+    args.output_dir = os.path.join(args.output_root_dir, args.output_dir)
 
     # Sanity checks
     if args.dataset_name is None and args.train_data_dir is None:
@@ -686,7 +710,11 @@ def main():
         
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
-    if args.dataset_name is not None:
+    if args.dataset_name == 'dalle3':
+        # Load your dataset here
+        subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
+        dataset = load_my_dataset(default_label=args.default_label, caption_csv_file=args.caption_csv_file, modified_images_subdir=subdirs)
+    elif args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
         dataset = load_dataset(
             args.dataset_name,
@@ -772,8 +800,12 @@ def main():
         def preprocess_train(examples):
             all_pixel_values = []
             for col_name in ['jpg_0', 'jpg_1']:
-                images = [Image.open(io.BytesIO(im_bytes)).convert("RGB")
-                            for im_bytes in examples[col_name]]
+                if args.dataset_name == 'dalle3':
+                    # here images are already loaded as PIL images
+                    images = [img.convert("RGB") for img in examples[col_name]]
+                else:
+                    images = [Image.open(io.BytesIO(im_bytes)).convert("RGB")
+                                for im_bytes in examples[col_name]]
                 pixel_values = [train_transforms(image) for image in images]
                 all_pixel_values.append(pixel_values)
             # Double on channel dim, jpg_y then jpg_w
@@ -802,8 +834,11 @@ def main():
             if args.choice_model:
                 # If using AIF then deliver image data for choice model to determine if should flip pixel values
                 for k in ['jpg_0', 'jpg_1']:
-                    return_d[k] = [Image.open(io.BytesIO( example[k])).convert("RGB")
-                                   for example in examples]
+                    if args.dataset_name == 'dalle3':
+                        return_d[k] = [example[k].convert("RGB") for example in examples]
+                    else:
+                        return_d[k] = [Image.open(io.BytesIO( example[k])).convert("RGB")
+                                    for example in examples]
                 return_d["caption"] = [example["caption"] for example in examples] 
             return return_d
          
@@ -833,6 +868,7 @@ def main():
                 for im_0_bytes, im_1_bytes, label_0 in zip(examples['jpg_0'], examples['jpg_1'], examples['label_0']):
                     assert label_0 in (0, 1)
                     im_bytes = im_0_bytes if label_0==1 else im_1_bytes
+                    # TODO: support my dataset
                     images.append(Image.open(io.BytesIO(im_bytes)).convert("RGB"))
             else:
                 images = [image.convert("RGB") for image in examples[image_column]]

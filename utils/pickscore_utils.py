@@ -5,8 +5,8 @@ import torch
 
 # load model
 
-processor_name_or_path = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
-model_pretrained_name_or_path = "yuvalkirstain/PickScore_v1"
+processor_name_or_path = "/share/wsy/CLIP-ViT-H-14-laion2B-s32B-b79K"
+model_pretrained_name_or_path = "/share/wsy/PickScore_v1"
 
 
 class Selector():

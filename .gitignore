@@ -1,0 +1,9 @@
+**/__pycache__/**
+archive/*
+ckp/*
+img/*
+launchers/*
+launchers-test/*
+prompt/*
+output/*
+result/*
