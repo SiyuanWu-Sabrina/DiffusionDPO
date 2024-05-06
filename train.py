@@ -74,6 +74,8 @@ DATASET_NAME_MAPPING = {
     "yuvalkirstain/pickapic_v1": ("jpg_0", "jpg_1", "label_0", "caption"),
     "yuvalkirstain/pickapic_v2": ("jpg_0", "jpg_1", "label_0", "caption"),
     'dalle3': ('jpg_0', 'jpg_1', 'label_0', 'caption'),
+    'laion115m': ('jpg_0', 'jpg_1', 'label_0', 'caption'),
+    'laion_high_res': ('jpg_0', 'jpg_1', 'label_0', 'caption')
 }
 
         
@@ -713,7 +715,48 @@ def main():
     if args.dataset_name == 'dalle3':
         # Load your dataset here
         subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
-        dataset = load_my_dataset(default_label=args.default_label, caption_csv_file=args.caption_csv_file, modified_images_subdir=subdirs)
+        dataset_args = {
+            "dalle3": {
+                "default_label": args.default_label,
+                "caption_csv_file": args.caption_csv_file,
+                "modified_images_subdir": subdirs
+            }
+        }
+        dataset = load_my_dataset(dataset_args, args.seed)
+    elif args.dataset_name == 'laion115m':
+        dataset_args = {
+            "laion115m": {
+                "default_label": args.default_label,
+                "seed": args.seed,
+            }
+        }
+        dataset = load_my_dataset(dataset_args, args.seed)
+    elif args.dataset_name == 'laion_high_res':
+        dataset_args = {
+            "laion_high_res": {
+                "default_label": args.default_label,
+                "seed": args.seed,
+            }
+        }
+        dataset = load_my_dataset(dataset_args, args.seed)
+    elif args.dataset_name == 'all':
+        subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
+        dataset_args = {
+            "dalle3": {
+                "default_label": args.default_label,
+                "caption_csv_file": args.caption_csv_file,
+                "modified_images_subdir": subdirs
+            },
+            "laion115m": {
+                "default_label": args.default_label,
+                "seed": args.seed,
+            },
+            "laion_high_res": {
+                "default_label": args.default_label,
+                "seed": args.seed,
+            }
+        }
+        dataset = load_my_dataset(dataset_args, args.seed)
     elif args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
         dataset = load_dataset(
@@ -800,7 +843,7 @@ def main():
         def preprocess_train(examples):
             all_pixel_values = []
             for col_name in ['jpg_0', 'jpg_1']:
-                if args.dataset_name == 'dalle3':
+                if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res']:
                     # here images are already loaded as PIL images
                     images = [img.convert("RGB") for img in examples[col_name]]
                 else:
@@ -834,7 +877,7 @@ def main():
             if args.choice_model:
                 # If using AIF then deliver image data for choice model to determine if should flip pixel values
                 for k in ['jpg_0', 'jpg_1']:
-                    if args.dataset_name == 'dalle3':
+                    if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res']:
                         return_d[k] = [example[k].convert("RGB") for example in examples]
                     else:
                         return_d[k] = [Image.open(io.BytesIO( example[k])).convert("RGB")
