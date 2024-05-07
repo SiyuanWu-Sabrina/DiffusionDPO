@@ -843,7 +843,7 @@ def main():
         def preprocess_train(examples):
             all_pixel_values = []
             for col_name in ['jpg_0', 'jpg_1']:
-                if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res']:
+                if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res', 'all']:
                     # here images are already loaded as PIL images
                     images = [img.convert("RGB") for img in examples[col_name]]
                 else:
@@ -877,7 +877,7 @@ def main():
             if args.choice_model:
                 # If using AIF then deliver image data for choice model to determine if should flip pixel values
                 for k in ['jpg_0', 'jpg_1']:
-                    if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res']:
+                    if args.dataset_name in ['dalle3', 'laion115m', 'laion_high_res', 'all']:
                         return_d[k] = [example[k].convert("RGB") for example in examples]
                     else:
                         return_d[k] = [Image.open(io.BytesIO( example[k])).convert("RGB")
