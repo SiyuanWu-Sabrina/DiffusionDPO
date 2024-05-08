@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=se-1e9
-#SBATCH --output=output/se-1e9.out
-#SBATCH --error=output/se-1e9.err
+#SBATCH --job-name=dalle3-1e-9
+#SBATCH --output=output/dalle3-1e-9.out
+#SBATCH --error=output/dalle3-1e-9.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:8
@@ -16,14 +16,14 @@ export DATASET_NAME="dalle3"
 export CACHE_DIR="./cache/default/"
 export MAX_TRAIN_STEP=256
 export WARMUP_STEP=10
-export GAS=16
-export CHECKPOINTING_STEP=16 # should be a multiple of GAS
+export GAS=32
+export CHECKPOINTING_STEP=32 # should be a multiple of GAS
 
 
 # Effective BS will be (N_GPU * train_batch_size * gradient_accumulation_steps)
 # Paper used 2048. Training takes ~30 hours / 200 steps
 
-# here we use batch size = 128, gradient accumulation steps = 16, 8 GPUs
+# here we use batch size = 256, gradient accumulation steps = 32, 8 GPUs
 
 accelerate launch train.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
@@ -40,8 +40,9 @@ accelerate launch train.py \
   --beta_dpo 5000 \
    --sdxl  \
   --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
-  --output_dir="se-42-1e9" \
-  --seed 42
+  --output_dir="dalle3-42-1e-9" \
+  --seed 42 \
+  --train_data_subdir 0
 
 
 accelerate launch train.py \
@@ -59,8 +60,10 @@ accelerate launch train.py \
   --beta_dpo 5000 \
    --sdxl  \
   --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
-  --output_dir="se-167-1e9" \
-  --seed 167
+  --output_dir="dalle3-167-1e-9" \
+  --seed 167 \
+  --train_data_subdir 0
+
 
 accelerate launch train.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
@@ -77,5 +80,6 @@ accelerate launch train.py \
   --beta_dpo 5000 \
    --sdxl  \
   --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
-  --output_dir="se-937-1e9" \
-  --seed 937
+  --output_dir="dalle3-937-1e-9" \
+  --seed 937 \
+  --train_data_subdir 0

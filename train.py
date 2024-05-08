@@ -717,7 +717,7 @@ def main():
         subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
         dataset_args = {
             "dalle3": {
-                "default_label": args.default_label,
+                "default_label": 1.0,
                 "caption_csv_file": args.caption_csv_file,
                 "modified_images_subdir": subdirs
             }
@@ -726,7 +726,7 @@ def main():
     elif args.dataset_name == 'laion115m':
         dataset_args = {
             "laion115m": {
-                "default_label": args.default_label,
+                "default_label": 0.0,
                 "seed": args.seed,
             }
         }
@@ -734,7 +734,7 @@ def main():
     elif args.dataset_name == 'laion_high_res':
         dataset_args = {
             "laion_high_res": {
-                "default_label": args.default_label,
+                "default_label": 0.0,
                 "seed": args.seed,
             }
         }
@@ -743,16 +743,16 @@ def main():
         subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
         dataset_args = {
             "dalle3": {
-                "default_label": args.default_label,
+                "default_label": 1.0,
                 "caption_csv_file": args.caption_csv_file,
                 "modified_images_subdir": subdirs
             },
             "laion115m": {
-                "default_label": args.default_label,
+                "default_label": 0.0,
                 "seed": args.seed,
             },
             "laion_high_res": {
-                "default_label": args.default_label,
+                "default_label": 0.0,
                 "seed": args.seed,
             }
         }

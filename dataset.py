@@ -79,7 +79,7 @@ def load_my_dataset(dataset_loader_args: Dict[str, Any], seed):
 def load_my_dataset_laion(
     name: str,
     splits: List[str] = ["train", "validation", "test"],
-    default_label: float = 1.0,
+    default_label: float = 0.0,
     seed: int = 42,
 ):
     if name == "laion115m":
