@@ -724,21 +724,30 @@ def main():
         }
         dataset = load_my_dataset(dataset_args, args.seed)
     elif args.dataset_name == 'laion115m':
+        print("DO NOT use laion115m!")
         dataset_args = {
             "laion115m": {
-                "default_label": 0.0,
+                "default_label": 1.0,
                 "seed": args.seed,
             }
         }
         dataset = load_my_dataset(dataset_args, args.seed)
     elif args.dataset_name == 'laion_high_res':
+        print("DO NOT use laion_high_res!")
         dataset_args = {
             "laion_high_res": {
-                "default_label": 0.0,
+                "default_label": 1.0,
                 "seed": args.seed,
             }
         }
         dataset = load_my_dataset(dataset_args, args.seed)
+    elif args.dataset_name == 'stable_diffusion':
+        dataset_args = {
+            "stable_diffusion": {
+                "default_label": 1.0,
+                "seed": args.seed,
+            }
+        }
     elif args.dataset_name == 'all':
         subdirs = [0] if args.train_data_subdir == '0' else list(range(0, 7))
         dataset_args = {
@@ -747,14 +756,18 @@ def main():
                 "caption_csv_file": args.caption_csv_file,
                 "modified_images_subdir": subdirs
             },
-            "laion115m": {
-                "default_label": 0.0,
+            "stable_diffusion": {
+                "default_label": 1.0,
                 "seed": args.seed,
             },
-            "laion_high_res": {
-                "default_label": 0.0,
-                "seed": args.seed,
-            }
+            # "laion115m": {
+            #     "default_label": 1.0,
+            #     "seed": args.seed,
+            # },
+            # "laion_high_res": {
+            #     "default_label": 1.0,
+            #     "seed": args.seed,
+            # }
         }
         dataset = load_my_dataset(dataset_args, args.seed)
     elif args.dataset_name is not None:

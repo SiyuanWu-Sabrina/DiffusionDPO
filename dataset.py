@@ -12,6 +12,10 @@ DALLE3_PROMPT_BLIP2_FLAN = '/share/imagereward_work/prompt_reconstruction/data/b
 LAION115M_INFO = '/share/imagereward_work/prompt_fidelity/data/generated_laion_images/laion115m.csv'
 LAION_HIGH_RES_INFO = '/share/imagereward_work/prompt_fidelity/data/generated_laion_images/laion_high_res.csv'
 
+Stable_Diffusion_CSV_Train_Path = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/data/train.csv"
+Generated_SDXL_Image_Dir = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/generated_images_sdxl/"
+Generated_SD15_Image_Dir = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/generated_images_sd15/"
+
 
 def align_file(file_list_a: List[str], file_list_b: List[str]) -> Tuple[List[str], List[str]]:
     """
@@ -48,6 +52,8 @@ def load_my_dataset(dataset_loader_args: Dict[str, Any], seed):
             dataset = load_my_dataset_laion("laion115m", **dataset_loader_args[dataset_name])
         elif dataset_name == "laion_high_res":
             dataset = load_my_dataset_laion("laion_high_res", **dataset_loader_args[dataset_name])
+        elif dataset_name == "stable_diffusion":
+            dataset = load_my_dataset_stable_diffusion(**dataset_loader_args[dataset_name])
         else:
             raise ValueError(f"Unknown dataset name: {dataset_name}")
         
@@ -74,6 +80,45 @@ def load_my_dataset(dataset_loader_args: Dict[str, Any], seed):
     dataset_test = dataset_test.cast_column("jpg_0", Image()).cast_column("jpg_1", Image())
 
     return {"train": dataset_train, "validation": dataset_val, "test": dataset_test}
+
+
+def load_my_dataset_stable_diffusion(
+    default_label: float = 1.0,
+    seed: int = 42,
+):
+    def check_align(file_list_a: List[str], file_list_b: List[str]) -> bool:
+        file_list_a = [os.path.basename(file) for file in file_list_a]
+        file_list_b = [os.path.basename(file) for file in file_list_b]
+
+        return file_list_a == file_list_b
+
+    print("Loading my dataset...")
+    prompt = pd.read_csv(Stable_Diffusion_CSV_Train_Path)["Prompt"].tolist()
+
+    pos_imgs = os.listdir(Generated_SDXL_Image_Dir)
+    pos_imgs = [os.path.join(Generated_SDXL_Image_Dir, img) for img in pos_imgs]
+    pos_imgs.sort()
+
+    neg_imgs = os.listdir(Generated_SD15_Image_Dir)
+    neg_imgs = [os.path.join(Generated_SD15_Image_Dir, img) for img in neg_imgs]
+    neg_imgs.sort()
+
+    # assert check_align(pos_imgs, neg_imgs)
+    if not check_align(pos_imgs, neg_imgs):
+        print("![Warning]: the files are not aligned.")
+        align_file(pos_imgs, neg_imgs)
+
+    dataset = {
+        "train": {
+            "jpg_0": pos_imgs,
+            "jpg_1": neg_imgs,
+            "label_0": [default_label]*len(pos_imgs),
+            "caption": prompt,
+        },
+        "validation": None,
+        "test": None,
+    }
+    return dataset
 
 
 def load_my_dataset_laion(
