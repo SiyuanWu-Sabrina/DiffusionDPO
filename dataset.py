@@ -12,7 +12,8 @@ DALLE3_PROMPT_BLIP2_FLAN = '/share/imagereward_work/prompt_reconstruction/data/b
 LAION115M_INFO = '/share/imagereward_work/prompt_fidelity/data/generated_laion_images/laion115m.csv'
 LAION_HIGH_RES_INFO = '/share/imagereward_work/prompt_fidelity/data/generated_laion_images/laion_high_res.csv'
 
-Stable_Diffusion_CSV_Train_Path = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/data/train.csv"
+# Stable_Diffusion_CSV_Train_Path = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/data/train.csv"
+Stable_Diffusion_CSV_Pair_Path = '/share/home/wusiyuan/imagereward_work/prompt_generate/result/priority_pair_over_4_prompt.csv'
 Generated_SDXL_Image_Dir = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/generated_images_sdxl/"
 Generated_SD15_Image_Dir = "/share/home/wusiyuan/imagereward_work/prompt_generate/Stable-Diffusion-Prompts/generated_images_sd15/"
 
@@ -59,12 +60,16 @@ def load_my_dataset(dataset_loader_args: Dict[str, Any], seed):
         
         # merge datasets
         for split in dataset.keys():
+            if dataset[split] is None:
+                continue
             for key in dataset[split].keys():
                 dataset_all[split][key].extend(dataset[split][key])
 
         # print dataset info
         print(f"Dataset {dataset_name} loaded.")
         for split in dataset.keys():
+            if dataset[split] is None:
+                continue
             print(f"{split}: {len(dataset[split]['jpg_0'])} samples")
         print()
 
@@ -93,15 +98,10 @@ def load_my_dataset_stable_diffusion(
         return file_list_a == file_list_b
 
     print("Loading my dataset...")
-    prompt = pd.read_csv(Stable_Diffusion_CSV_Train_Path)["Prompt"].tolist()
-
-    pos_imgs = os.listdir(Generated_SDXL_Image_Dir)
-    pos_imgs = [os.path.join(Generated_SDXL_Image_Dir, img) for img in pos_imgs]
-    pos_imgs.sort()
-
-    neg_imgs = os.listdir(Generated_SD15_Image_Dir)
-    neg_imgs = [os.path.join(Generated_SD15_Image_Dir, img) for img in neg_imgs]
-    neg_imgs.sort()
+    df = pd.read_csv(Stable_Diffusion_CSV_Pair_Path)
+    prompt = df["Prompt"].tolist()
+    pos_imgs = df["image_path_winner"].tolist()
+    neg_imgs = df["image_path_loser"].tolist()
 
     # assert check_align(pos_imgs, neg_imgs)
     if not check_align(pos_imgs, neg_imgs):
