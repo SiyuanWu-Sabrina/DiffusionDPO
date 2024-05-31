@@ -25,24 +25,24 @@ export CHECKPOINTING_STEP=32 # should be a multiple of GAS
 
 # here we use batch size = 256, gradient accumulation steps = 32, 8 GPUs
 
-accelerate launch train.py \
-  --pretrained_model_name_or_path=$MODEL_NAME \
-  --pretrained_vae_model_name_or_path=$VAE \
-  --dataset_name=$DATASET_NAME \
-  --train_batch_size=1 \
-  --dataloader_num_workers=16 \
-  --gradient_accumulation_steps=$GAS \
-  --max_train_steps=$MAX_TRAIN_STEP \
-  --lr_scheduler="constant_with_warmup" --lr_warmup_steps=$WARMUP_STEP \
-  --learning_rate=1e-9 --scale_lr \
-  --cache_dir=$CACHE_DIR \
-  --checkpointing_steps $CHECKPOINTING_STEP \
-  --beta_dpo 5000 \
-   --sdxl  \
-  --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
-  --output_dir="stable_diffusion-42-2e-10" \
-  --seed 42 \
-  --train_data_subdir 0
+# accelerate launch train.py \
+#   --pretrained_model_name_or_path=$MODEL_NAME \
+#   --pretrained_vae_model_name_or_path=$VAE \
+#   --dataset_name=$DATASET_NAME \
+#   --train_batch_size=1 \
+#   --dataloader_num_workers=16 \
+#   --gradient_accumulation_steps=$GAS \
+#   --max_train_steps=$MAX_TRAIN_STEP \
+#   --lr_scheduler="constant_with_warmup" --lr_warmup_steps=$WARMUP_STEP \
+#   --learning_rate=1e-9 --scale_lr \
+#   --cache_dir=$CACHE_DIR \
+#   --checkpointing_steps $CHECKPOINTING_STEP \
+#   --beta_dpo 5000 \
+#    --sdxl  \
+#   --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
+#   --output_dir="stable_diffusion-42-2e-10" \
+#   --seed 42 \
+#   --train_data_subdir 0
 
 
 accelerate launch train.py \
@@ -65,21 +65,21 @@ accelerate launch train.py \
   --train_data_subdir 0
 
 
-accelerate launch train.py \
-  --pretrained_model_name_or_path=$MODEL_NAME \
-  --pretrained_vae_model_name_or_path=$VAE \
-  --dataset_name=$DATASET_NAME \
-  --train_batch_size=1 \
-  --dataloader_num_workers=16 \
-  --gradient_accumulation_steps=$GAS \
-  --max_train_steps=$MAX_TRAIN_STEP \
-  --lr_scheduler="constant_with_warmup" --lr_warmup_steps=$WARMUP_STEP \
-  --learning_rate=1e-9 --scale_lr \
-  --cache_dir=$CACHE_DIR \
-  --checkpointing_steps $CHECKPOINTING_STEP \
-  --beta_dpo 5000 \
-   --sdxl  \
-  --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
-  --output_dir="stable_diffusion-937-2e-10" \
-  --seed 937 \
-  --train_data_subdir 0
+# accelerate launch train.py \
+#   --pretrained_model_name_or_path=$MODEL_NAME \
+#   --pretrained_vae_model_name_or_path=$VAE \
+#   --dataset_name=$DATASET_NAME \
+#   --train_batch_size=1 \
+#   --dataloader_num_workers=16 \
+#   --gradient_accumulation_steps=$GAS \
+#   --max_train_steps=$MAX_TRAIN_STEP \
+#   --lr_scheduler="constant_with_warmup" --lr_warmup_steps=$WARMUP_STEP \
+#   --learning_rate=1e-9 --scale_lr \
+#   --cache_dir=$CACHE_DIR \
+#   --checkpointing_steps $CHECKPOINTING_STEP \
+#   --beta_dpo 5000 \
+#    --sdxl  \
+#   --caption_csv_file /share/imagereward_work/prompt_reconstruction/data/blip2_flan.csv \
+#   --output_dir="stable_diffusion-937-2e-10" \
+#   --seed 937 \
+#   --train_data_subdir 0
